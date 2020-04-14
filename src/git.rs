@@ -14,6 +14,11 @@ fn git_tag_delete(version: &str) -> std::io::Result<Output> {
     cmd.arg("tag").arg("-d").arg(version).output()
 }
 
+fn git_fetch() -> std::io::Result<Output> {
+    let mut cmd = new_git();
+    cmd.arg("fetch").output()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -25,5 +30,11 @@ mod tests {
         let result = git_tag_delete(version_str).unwrap();
         let output = String::from_utf8_lossy(&result.stdout).to_string();
         assert!(output.contains("Deleted tag 'test-git-tag'"), true);
+    }
+
+    #[test]
+    fn test_git_fetch() {
+        let result = git_fetch().unwrap();
+        assert_eq!(result.status.code().unwrap(), 0);
     }
 }
