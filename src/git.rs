@@ -24,6 +24,23 @@ pub fn git_fetch() -> std::io::Result<Output> {
     cmd.arg("fetch").output()
 }
 
+pub fn version_list() -> Vec<String> {
+    let result = git_tag().unwrap();
+    let stdout_string = String::from_utf8(result.stdout).unwrap();
+    let trimed = stdout_string.trim_end();
+    let mut iter = trimed.split_ascii_whitespace();
+    let mut vec = Vec::<String>::new();
+    loop {
+        match iter.next() {
+            Some(x) => {
+                vec.push(x.to_string());
+            }
+            None => break,
+        }
+    }
+    return vec;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -49,5 +66,12 @@ mod tests {
     fn test_git_fetch() {
         let result = git_fetch().unwrap();
         assert_eq!(result.status.code().unwrap(), 0);
+    }
+
+    #[test]
+    fn test_version_list() {
+        let vec = version_list();
+        assert_eq!(vec.len(), 1);
+        assert_eq!(vec[0], "v1.0.0");
     }
 }
