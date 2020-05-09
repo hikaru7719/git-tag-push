@@ -52,6 +52,10 @@ pub fn read_all_version() -> Vec<String> {
     return version_list();
 }
 
+pub fn tag_push(target: String) {
+    git_tag_version(target).unwrap();
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
