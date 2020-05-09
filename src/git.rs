@@ -9,12 +9,12 @@ pub fn git_tag() -> std::io::Result<Output> {
     cmd.arg("tag").output()
 }
 
-pub fn git_tag_version(version: &str) -> std::io::Result<Output> {
+pub fn git_tag_version(version: String) -> std::io::Result<Output> {
     let mut cmd = new_git();
     cmd.arg("tag").arg(version).output()
 }
 
-fn git_tag_delete(version: &str) -> std::io::Result<Output> {
+pub fn git_tag_delete(version: String) -> std::io::Result<Output> {
     let mut cmd = new_git();
     cmd.arg("tag").arg("-d").arg(version).output()
 }
@@ -66,9 +66,9 @@ mod tests {
 
     #[test]
     fn test_git_tag_version() {
-        let version_str = "test-git-tag";
-        git_tag_version(version_str).unwrap();
-        let result = git_tag_delete(version_str).unwrap();
+        let version = "test-git-tag";
+        git_tag_version(version.to_string()).unwrap();
+        let result = git_tag_delete(version.to_string()).unwrap();
         let output = String::from_utf8_lossy(&result.stdout).to_string();
         assert!(output.contains("Deleted tag 'test-git-tag'"), true);
     }
