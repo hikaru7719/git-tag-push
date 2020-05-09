@@ -12,13 +12,32 @@ pub enum VersioningErr {
     NotSemVer,
 }
 
+use std::fmt;
+impl fmt::Display for VersioningErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            VersioningErr::NotSemVer => write!(f, "NotSemanticVersioning"),
+        }
+    }
+}
+
+pub fn target_version(version_list: &mut Vec<String>) -> String {
+    let mut vec = SemVer::from(version_list);
+    vec.reverse();
+    let latest_version = &mut vec[0];
+    latest_version.increment_patch();
+    return latest_version.to_string();
+}
+
 impl SemVer {
     pub fn new(version: &mut String) -> Result<SemVer, VersioningErr> {
         if version.remove(0) != 'v' {
+            println!("{} doesn't start v", version);
             return Err(VersioningErr::NotSemVer);
         }
         let v: Vec<&str> = version.split(".").collect();
         if v.len() != 3 {
+            println!("{} doesn't have major or minor or patch", version);
             return Err(VersioningErr::NotSemVer);
         }
         return Ok(SemVer {
@@ -27,8 +46,39 @@ impl SemVer {
             patch: v[2].parse().unwrap(),
         });
     }
+    pub fn from(version_list: &mut Vec<String>) -> Vec<SemVer> {
+        let mut vec: Vec<SemVer> = Vec::new();
+        for version in version_list {
+            match SemVer::new(version) {
+                Ok(v) => vec.push(v),
+                Err(e) => {
+                    println!("Err {}: can't convert to semver {}", e, version);
+                    continue;
+                }
+            }
+        }
+        return vec;
+    }
     pub fn to_string(&self) -> String {
         return format!("v{}.{}.{}", self.major, self.minor, self.patch);
+    }
+    pub fn increment_major(&self) -> SemVer {
+        SemVer {
+            major: self.major + 1,
+            ..*self
+        }
+    }
+    pub fn increment_minor(&self) -> SemVer {
+        SemVer {
+            major: self.minor + 1,
+            ..*self
+        }
+    }
+    pub fn increment_patch(&self) -> SemVer {
+        SemVer {
+            major: self.patch + 1,
+            ..*self
+        }
     }
 }
 

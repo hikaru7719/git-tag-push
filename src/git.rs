@@ -24,6 +24,10 @@ pub fn git_fetch() -> std::io::Result<Output> {
     cmd.arg("fetch").output()
 }
 
+pub fn update_local() {
+    git_fetch().unwrap();
+}
+
 pub fn version_list() -> Vec<String> {
     let result = git_tag().unwrap();
     let stdout_string = String::from_utf8(result.stdout).unwrap();
@@ -39,6 +43,13 @@ pub fn version_list() -> Vec<String> {
         }
     }
     return vec;
+}
+
+pub enum GitError {}
+
+pub fn read_all_version() -> Vec<String> {
+    update_local();
+    return version_list();
 }
 
 #[cfg(test)]
