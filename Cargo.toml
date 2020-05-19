@@ -1,5 +1,5 @@
 [package]
-name = "git-tag-push"
+name = "git_tag_push"
 version = "0.1.0"
 authors = ["hikaru7719 <j148016s@st.u-gakugei.ac.jp>"]
 
