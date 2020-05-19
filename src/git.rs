@@ -4,6 +4,12 @@ pub fn new_git() -> Command {
     Command::new("git")
 }
 
+#[derive(Debug)]
+pub enum CommandError {
+    Io(std::io::Error),
+    Read(std::string::FromUtf8Error),
+}
+
 pub fn git_tag() -> std::io::Result<Output> {
     let mut cmd = new_git();
     cmd.arg("tag").output()
@@ -24,13 +30,25 @@ pub fn git_fetch() -> std::io::Result<Output> {
     cmd.arg("fetch").output()
 }
 
-pub fn update_local() {
-    git_fetch().unwrap();
+pub fn run_command(f: fn() -> std::io::Result<Output>) -> Result<String, CommandError> {
+    f().map_err(CommandError::Io)
+        .and_then(|output| String::from_utf8(output.stdout).map_err(CommandError::Read))
 }
 
-pub fn version_list() -> Vec<String> {
-    let result = git_tag().unwrap();
-    let stdout_string = String::from_utf8(result.stdout).unwrap();
+pub fn run_command_with_arg(
+    arg: String,
+    f: fn(String) -> std::io::Result<Output>,
+) -> Result<String, CommandError> {
+    f(arg)
+        .map_err(CommandError::Io)
+        .and_then(|output| String::from_utf8(output.stdout).map_err(CommandError::Read))
+}
+
+pub fn version_list() -> Result<Vec<String>, CommandError> {
+    let mut stdout_string = match run_command(git_tag) {
+        Ok(output) => output,
+        Err(err) => return Err(err),
+    };
     let trimed = stdout_string.trim_end();
     let mut iter = trimed.split_ascii_whitespace();
     let mut vec = Vec::<String>::new();
@@ -42,18 +60,7 @@ pub fn version_list() -> Vec<String> {
             None => break,
         }
     }
-    return vec;
-}
-
-pub enum GitError {}
-
-pub fn read_all_version() -> Vec<String> {
-    update_local();
-    return version_list();
-}
-
-pub fn tag_push(target: String) {
-    git_tag_version(target).unwrap();
+    Ok(vec)
 }
 
 #[cfg(test)]
@@ -85,7 +92,7 @@ mod tests {
 
     #[test]
     fn test_version_list() {
-        let vec = version_list();
+        let vec = version_list().unwrap();
         assert_eq!(vec.len(), 1);
         assert_eq!(vec[0], "v1.0.0");
     }
