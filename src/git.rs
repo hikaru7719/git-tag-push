@@ -46,8 +46,7 @@ pub fn run_command_with_arg(
 
 pub fn version_list() -> Result<Vec<String>, CommandError> {
     let stdout_string = run_command(git_tag)?;
-    let trimed = stdout_string.trim_end();
-    let mut iter = trimed.split_ascii_whitespace();
+    let mut iter = stdout_string.trim_end().split_ascii_whitespace();
     let mut vec = Vec::<String>::new();
     loop {
         match iter.next() {
