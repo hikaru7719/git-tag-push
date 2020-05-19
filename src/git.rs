@@ -45,7 +45,7 @@ pub fn run_command_with_arg(
 }
 
 pub fn version_list() -> Result<Vec<String>, CommandError> {
-    let mut stdout_string = match run_command(git_tag) {
+    let stdout_string = match run_command(git_tag) {
         Ok(output) => output,
         Err(err) => return Err(err),
     };
