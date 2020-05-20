@@ -1,5 +1,5 @@
+use super::config::Config;
 use std::process::{Command, Output};
-
 pub fn new_git() -> Command {
     Command::new("git")
 }
@@ -44,7 +44,10 @@ pub fn run_command_with_arg(
         .and_then(|output| String::from_utf8(output.stdout).map_err(CommandError::Read))
 }
 
-pub fn version_list() -> Result<Vec<String>, CommandError> {
+pub fn version_list(config: &Config) -> Result<Vec<String>, CommandError> {
+    if config.fetch == true {
+        run_command(git_fetch)?;
+    }
     let stdout_string = run_command(git_tag)?;
     let mut iter = stdout_string.trim_end().split_ascii_whitespace();
     let mut vec = Vec::<String>::new();
@@ -57,6 +60,11 @@ pub fn version_list() -> Result<Vec<String>, CommandError> {
         }
     }
     Ok(vec)
+}
+
+pub fn tag_and_push(version: String, config: &Config) -> Result<i32, CommandError> {
+    run_command_with_arg(version, git_tag_version)?;
+    Ok(0)
 }
 
 #[cfg(test)]
@@ -88,7 +96,7 @@ mod tests {
 
     #[test]
     fn test_version_list() {
-        let vec = version_list().unwrap();
+        let vec = version_list(&Config::new()).unwrap();
         assert_eq!(vec.len(), 1);
         assert_eq!(vec[0], "v1.0.0");
     }

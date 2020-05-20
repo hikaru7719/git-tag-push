@@ -1,7 +1,7 @@
 extern crate clap;
 extern crate git_tag_push;
 use clap::{App, Arg, ArgMatches};
-use git_tag_push::config::Config;
+use git_tag_push::{config, run};
 fn main() {
     let app = App::new("git-tag-push")
         .version("0.1.0")
@@ -34,11 +34,17 @@ fn main() {
         .subcommand(App::new("minor"))
         .subcommand(App::new("patch"));
 
-    let config = get_config(&app.get_matches());
+    std::process::exit(match run::run(get_config(&app.get_matches())) {
+        Ok(_) => 0,
+        Err(e) => {
+            println!("Error:{:?}", e);
+            1
+        }
+    });
 }
 
-fn get_config(matches: &ArgMatches) -> Config {
-    let mut config = Config::new();
+fn get_config(matches: &ArgMatches) -> config::Config {
+    let mut config = config::Config::new();
 
     if let Some(p) = matches.value_of("prefix") {
         config.prefix = String::from(p);
