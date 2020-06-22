@@ -1,3 +1,4 @@
+use super::config::Config;
 use std::cmp::Ordering;
 
 #[derive(Eq)]
@@ -21,12 +22,37 @@ impl fmt::Display for VersioningErr {
     }
 }
 
-pub fn target_version(version_list: &mut Vec<String>) -> String {
+pub fn upgrade(version_list: &mut Vec<String>, config: &Config) -> String {
+    latest_version(version_list)
+        .or(Some(SemVer {
+            major: 0,
+            minor: 0,
+            patch: 0,
+        }))
+        .map(|v| upgrade_latest_version(v, config))
+        .unwrap()
+}
+
+fn upgrade_latest_version(latest: SemVer, config: &Config) -> String {
+    if config.major == true {
+        latest.increment_major().to_string();
+    }
+
+    if config.minor == true {
+        latest.increment_minor().to_string();
+    }
+
+    if config.patch == true {
+        latest.increment_patch().to_string();
+    }
+
+    latest.to_string()
+}
+
+fn latest_version(version_list: &mut Vec<String>) -> Option<SemVer> {
     let mut vec = SemVer::from(version_list);
     vec.reverse();
-    let latest_version = &mut vec[0];
-    latest_version.increment_patch();
-    return latest_version.to_string();
+    vec.pop()
 }
 
 impl SemVer {
