@@ -15,12 +15,12 @@ pub fn git_tag() -> std::io::Result<Output> {
     cmd.arg("tag").output()
 }
 
-pub fn git_tag_version(version: String) -> std::io::Result<Output> {
+pub fn git_tag_version(version: &String) -> std::io::Result<Output> {
     let mut cmd = new_git();
     cmd.arg("tag").arg(version).output()
 }
 
-pub fn git_tag_delete(version: String) -> std::io::Result<Output> {
+pub fn git_tag_delete(version: &String) -> std::io::Result<Output> {
     let mut cmd = new_git();
     cmd.arg("tag").arg("-d").arg(version).output()
 }
@@ -30,14 +30,19 @@ pub fn git_fetch() -> std::io::Result<Output> {
     cmd.arg("fetch").output()
 }
 
+pub fn git_push(version: &String) -> std::io::Result<Output> {
+    let mut cmd = new_git();
+    cmd.arg("push").arg("origin").arg(version).output()
+}
+
 pub fn run_command(f: fn() -> std::io::Result<Output>) -> Result<String, CommandError> {
     f().map_err(CommandError::Io)
         .and_then(|output| String::from_utf8(output.stdout).map_err(CommandError::Read))
 }
 
 pub fn run_command_with_arg(
-    arg: String,
-    f: fn(String) -> std::io::Result<Output>,
+    arg: &String,
+    f: fn(&String) -> std::io::Result<Output>,
 ) -> Result<String, CommandError> {
     f(arg)
         .map_err(CommandError::Io)
@@ -63,7 +68,10 @@ pub fn version_list(config: &Config) -> Result<Vec<String>, CommandError> {
 }
 
 pub fn tag_and_push(version: String, config: &Config) -> Result<i32, CommandError> {
-    run_command_with_arg(version, git_tag_version)?;
+    run_command_with_arg(&version, git_tag_version)?;
+    if config.auto_push == true {
+        run_command_with_arg(&version, git_push)?;
+    }
     Ok(0)
 }
 
@@ -82,8 +90,8 @@ mod tests {
     #[test]
     fn test_git_tag_version() {
         let version = "test-git-tag";
-        git_tag_version(version.to_string()).unwrap();
-        let result = git_tag_delete(version.to_string()).unwrap();
+        git_tag_version(&version.to_string()).unwrap();
+        let result = git_tag_delete(&version.to_string()).unwrap();
         let output = String::from_utf8_lossy(&result.stdout).to_string();
         assert!(output.contains("Deleted tag 'test-git-tag'"), true);
     }
