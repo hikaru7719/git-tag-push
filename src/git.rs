@@ -101,11 +101,4 @@ mod tests {
         let result = git_fetch().unwrap();
         assert_eq!(result.status.code().unwrap(), 0);
     }
-
-    #[test]
-    fn test_version_list() {
-        let vec = version_list(&Config::new()).unwrap();
-        assert_eq!(vec.len(), 1);
-        assert_eq!(vec[0], "v1.0.0");
-    }
 }
