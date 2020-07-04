@@ -56,7 +56,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "git_tag_push"
+name = "git_tag_version"
 version = "0.1.0"
 dependencies = [
  "clap",
