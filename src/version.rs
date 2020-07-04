@@ -49,7 +49,7 @@ fn upgrade_latest_version(latest: SemVer, config: &Config) -> String {
     latest.to_string()
 }
 
-fn latest_version(version_list: &mut Vec<String>) -> Option<SemVer> {
+pub fn latest_version(version_list: &mut Vec<String>) -> Option<SemVer> {
     let mut vec = SemVer::from(version_list);
     vec.reverse();
     vec.pop()

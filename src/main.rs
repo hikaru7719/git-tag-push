@@ -1,7 +1,7 @@
 extern crate clap;
-extern crate git_tag_push;
+extern crate git_tag_version;
 use clap::{App, Arg, ArgMatches};
-use git_tag_push::{config, run};
+use git_tag_version::{config, run};
 fn main() {
     let app = App::new("git-tag-push")
         .version("0.1.0")

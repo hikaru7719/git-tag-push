@@ -7,3 +7,4 @@ authors = ["hikaru7719 <j148016s@st.u-gakugei.ac.jp>"]
 
 [dependencies]
 clap = "3.0.0-beta.1"
+uuid = { version = "0.8.1", features = ["v4"] }
